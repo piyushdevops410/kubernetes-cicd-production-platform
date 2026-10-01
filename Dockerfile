@@ -14,5 +14,7 @@ ENV ENVIRONMENT=production
 
 EXPOSE 3000
 
+USER node
+
 CMD ["node", "server.js"]
 
