@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubernetes-cicd-app
+  namespace: kubernetes-cicd
+  labels:
+    app: kubernetes-cicd-app
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: kubernetes-cicd-app
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
+  template:
+    metadata:
+      labels:
+        app: kubernetes-cicd-app
+
+    spec:
+      containers:
+        - name: kubernetes-cicd-app
+          image: kubernetes-cicd-app:1.0
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 3000
+
+          env:
+            - name: PORT
+              value: "3000"
+
+            - name: APP_VERSION
+              value: "1.0.0"
+
+            - name: ENVIRONMENT
+              value: "production"
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 20
