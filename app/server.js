@@ -28,6 +28,10 @@ app.get("/version", (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Application running on port ${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Application running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
