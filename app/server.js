@@ -21,6 +21,21 @@ app.get('/version', (req, res) => {
     });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Kubernetes CI/CD Application running on port ${PORT}`);
+app.get('/api/info', (req, res) => {
+    res.json({
+        application: 'Kubernetes CI/CD Application',
+        version: APP_VERSION,
+        environment: ENVIRONMENT,
+        message: 'Application is running successfully'
+    });
 });
+
+// Start server only when this file is executed directly.
+// This prevents Jest/Supertest from starting a real server.
+if (require.main === module) {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Kubernetes CI/CD Application running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
