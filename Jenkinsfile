@@ -7,8 +7,11 @@ pipeline {
         ECR_REPOSITORY = 'kubernetes-cicd-production-platform'
         IMAGE_NAME = 'kubernetes-cicd-app'
         IMAGE_TAG = "${BUILD_NUMBER}"
+
+        K8S_NAMESPACE = 'kubernetes-cicd'
+        K8S_DEPLOYMENT = 'kubernetes-cicd-app'
     }
-	
+
     stages {
 
         stage('Checkout') {
@@ -38,8 +41,8 @@ pipeline {
                 sh 'docker build -t kubernetes-cicd-app:${BUILD_NUMBER} .'
             }
         }
-	
-	stage('Push Image to ECR') {
+
+        stage('Push Image to ECR') {
             steps {
                 withCredentials([
                     [$class: 'AmazonWebServicesCredentialsBinding',
@@ -62,15 +65,44 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    kubectl -n ${K8S_NAMESPACE} set image \
+                    deployment/${K8S_DEPLOYMENT} \
+                    ${IMAGE_NAME}=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('Kubernetes Rollout Validation') {
+            steps {
+                sh '''
+                    kubectl rollout status \
+                    deployment/${K8S_DEPLOYMENT} \
+                    -n ${K8S_NAMESPACE} \
+                    --timeout=180s
+
+                    kubectl get deployment \
+                    ${K8S_DEPLOYMENT} \
+                    -n ${K8S_NAMESPACE}
+
+                    kubectl get pods \
+                    -n ${K8S_NAMESPACE} \
+                    -l app=${IMAGE_NAME}
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'CI Pipeline completed successfully.'
+            echo 'CI/CD Pipeline completed successfully.'
         }
 
         failure {
-            echo 'CI Pipeline failed.'
+            echo 'CI/CD Pipeline failed.'
         }
     }
 }
