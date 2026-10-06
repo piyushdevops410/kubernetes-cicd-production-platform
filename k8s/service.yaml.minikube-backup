@@ -7,7 +7,7 @@ metadata:
     app: kubernetes-cicd-app
 
 spec:
-  type: LoadBalancer
+  type: NodePort
 
   selector:
     app: kubernetes-cicd-app
@@ -16,4 +16,4 @@ spec:
     - protocol: TCP
       port: 3000
       targetPort: 3000
-
+      nodePort: 30002

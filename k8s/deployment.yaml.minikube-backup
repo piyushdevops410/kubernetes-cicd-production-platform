@@ -26,9 +26,12 @@ spec:
         app: kubernetes-cicd-app
 
     spec:
+      imagePullSecrets:
+        - name: ecr-registry-secret
+
       containers:
         - name: kubernetes-cicd-app
-          image: 889038136848.dkr.ecr.us-east-1.amazonaws.com/kubernetes-cicd-production-platform:8
+          image: 889038136848.dkr.ecr.us-east-1.amazonaws.com/kubernetes-cicd-production-platform:3
           imagePullPolicy: Always
 
           ports:
